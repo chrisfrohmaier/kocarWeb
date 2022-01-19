@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <!-- <link href="css/bootstrap4-toggle.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap4-toggle.min.css') }}">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+
+
+<style>
+.axisC { font: 20px sans-serif}
+
+.axisC line{
+  stroke: "{{ bar_color | string }}" !important;
+}
+
+.axisC path{
+  stroke: "{{ bar_color | string }}" !important;
+}
+
+.axisC text{
+  fill: "{{ bar_color | string }}" !important;
+}
+
+
+</style>
+
+
+    <title>KOCAR Culprit</title>
+  </head>
+
+  <body>
+      <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+                <a class="navbar-brand" href="#">KOCAR Web App</a>
+
+        </nav>
+    </header>
+    <br>
+    <!-- <main style="background-color:#292b2c"> -->
+    <main>
+        <div class="pl-5 container-fluid " >
+                <div class="row">
+                  <div class="col-lg-5" align="left">
+                     <!-- Terit, UtsteinCohort, Vasc, InitialRhyth, Age2, normalECG,ste, rbbb, TTE -->
+                        <form action="{{ url_for('main') }}" method="POST">
+                                <fieldset>
+                                    <legend><h3>Input values:</h3></legend>
+                                    <input name="Age2" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[4] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="Age2"><b>Age</b></label>
+                                    <p>Younger than 70 years?</p>
+
+                                    <input name="normalECG" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[5] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="normalECG"><b>Normal ECG?</b></label>
+                                    <br>
+                                    <br>
+
+                                    <input name="ste" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[6] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="ste"><b>ST elevation?</b></label>
+                                    <p>Is there ST elevation/LBBB?</p>
+
+                                    <input name="Terit" type="checkbox"  data-toggle="toggle" {{ resd[0] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="Terit"><b>Localising Feature?</b></label>
+                                    <p>Is there a localising feature on the ECG? (2mm of ST change in contiguous leads)</p>
+
+                                    <input name="rbbb" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[7] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="rbbb"><b>RBBB</b></label>
+                                    <p>Is there RBBB?</p>
+
+                                    <input name="InitialRhyth" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[3] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="InitialRhyth"><b>Shockable rhythm?</b></label>
+                                    <p>VF or VT as initial rhythm?</p>
+
+                                    <input name="UtsteinCohort" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[1] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="UtsteinCohort"><b>Utstein Cohort?</b></label>
+                                    <p>Is the patient part of the Utstein Cohort? (Witnessed  with early bystander CPR and shockable rhythm)</p>
+
+                                    <input name="Vasc" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[2] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="Vasc"><b>Vascular History?</b></label>
+                                    <p>Prior vascular history? (Defined as prior PCI/ CABG or cerebral infarction)</p>
+
+                                    <input name="TTE" type="checkbox" type="checkbox" data-toggle="toggle" {{ resd[8] }} data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger">
+                                    <label for="TTE"><b>RWMA?</b></label>
+                                    <p>Is there a regional wall motion abnormality on TTE?</p>
+                                    <!-- <input type="submit"> -->
+                                    <input type="submit" class="btn btn-info btn-lg" value="Calculate">
+                                </fieldset>
+                            </form>
+                  </div>
+                  <div class="col-lg-7">
+                        <div class="col" align="center">
+                                <!-- {% if result %} -->
+                                    <!-- {% for variable, value in original_input.items() %}
+                                        <b>{{ variable }}</b> : {{ value }}
+                                    {% endfor %} -->
+                                     <h3>Probability of Culprit:</h3>
+                                     <h2> {{ '%0.2f'|format(result)|float }}</h2>
+
+                                <!-- {% endif %} -->
+                            </div>
+                            <div id="my_dataviz" class="col" align="center"></div> 
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">About</div>
+                            <div class="card-body">
+                                <div class="card-title">
+                                    <h4 class="text-secondary">Please, <strong>DO NOT</strong> use on patients until paper is published!</h4>
+                                    <p class="card-text">
+                                        This Web App is is based on the ensemble classifer described in the publication XXX.XXX (link).
+                                    </p>
+                                    <p class="card-text">
+                                        This work was funded by STFC grant <strong>ST/S002308/1</strong> and was a collaboration between <a href="http://www.icg.port.ac.uk">The Institute of Cosmology and Gravitation (University of Portsmouth)</a>, the University of Southampton, and King's College London.
+                                    </p>
+                                    <p class="card-text">
+                                        &copy; 2020 Christopher Frohmaier, Mathew Smith, Nilesh Pareek. Last update October 2020.
+                                    </p>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </main>
+            <br>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- <script type="text/javascript" src="js/jquery-3.2.1.slim.min.js"></script> -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
+
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <!-- <script type="text/javascript" src="js/popper.min.js"></script> -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
+    <!-- <script type="text/javascript" src="js/bootstrap.min.js"></script> -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <!-- <script type="text/javascript" src="js/bootstrap4-toggle.min.js"></script> -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap4-toggle.min.js') }}"></script>
+
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+        <!-- D3 JS Stuff -->
+    <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+    <script src="{{ url_for('static', filename='js/d3.v4.js') }}"></script>
+
+    <script>
+            data = [
+        {label:"Culprit", Value: {{ result|float }} },
+        {label:"No Culprit", Value: {{ resultN|float }}}
+    ];
+
+            // set the dimensions and margins of the graph
+            var margin = {top: 10, right: 5, bottom: 1, left: 50},
+                width = 500 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // append the svg object to the body of the page
+            var svg = d3.select("#my_dataviz")
+              .append("svg")
+              .attr("width", "90%")
+              .attr("height", "90%")
+              .attr("viewBox", "0 0 700 600")
+              .append("g")
+                .attr("transform",
+                      "translate(" + margin.left + "," + margin.top + ")");
+
+            // Parse the Data
+            // d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv", function(data) {
+
+            // X axis
+            var x = d3.scaleBand()
+              .range([ 0, width ])
+              .domain(data.map(function(d) { return d.label; }))
+              .padding(0.2);
+            svg.append("g")
+            .attr("class", "axisC")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x))
+              .selectAll("text")
+                .attr("transform", "translate(0,0)rotate(0)")
+                .style("text-anchor", "center")
+                .attr("fill", "{{ bar_color | string }}" );
+            // Add Y axis
+            var y = d3.scaleLinear()
+              .domain([0, 1])
+              .range([ height, 0]);
+            svg.append("g")
+            .attr("class", "axisC")
+            .attr("line", "{{ bar_color | string }}" )
+            .attr("fill", "{{ bar_color | string }}" )
+              .call(d3.axisLeft(y))
+              .selectAll("text")
+                .attr("fill", "{{ bar_color | string }}" );
+
+            svg.selectAll('path').style("stroke", "{{ bar_color | string }}");
+            svg.selectAll('line').style("stroke", "{{ bar_color | string }}");
+
+
+            // Bars
+            svg.selectAll("mybar")
+              .data(data)
+              .enter()
+              .append("rect")
+                .attr("x", function(d) { return x(d.label); })
+                .attr("width", x.bandwidth())
+                .attr("fill","{{ bar_color | string }}")
+                .attr("stroke", "{{ bar_color | string }}" )
+                .style("stroke-width", 2)
+                // no bar at the beginning thus:
+                .attr("height", function(d) { return height - y(0); }) // always equal to 0
+                .attr("y", function(d) { return y(0); })
+            // Animation
+            svg.selectAll("rect")
+              .transition()
+              .duration(800)
+              .attr("y", function(d) { return y(d.Value); })
+              .attr("height", function(d) { return height - y(d.Value); })
+              .delay(function(d,i){console.log(i) ; return(i*100)})
+
+            </script>
+
+  </body>
+</html>
