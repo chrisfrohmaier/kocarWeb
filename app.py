@@ -51,14 +51,14 @@ def main():
                                        dtype=float)
 
         # Get the model's prediction
-        prediction = model.predict_proba(input_variables, ntree_limit=0, validate_features=True)[0][0]
+        prediction = model.predict_proba(input_variables, ntree_limit=0, validate_features=True, iteration_range=[0,200])[0][0]
         #prediction = model.predict_proba(input_variables)[0][0] ## This is for the calibrated model
         # Render the form again, but add in the prediction and remind user
         # of the values they input before
 
-        if 1 - prediction >= 0.85:
+        if 1 - prediction >= 0.7:
             culp_c = '#56CC9D'
-        elif 1-prediction <= 0.25:
+        elif 1-prediction <= 0.3:
             culp_c = '#FF7851'
         else: culp_c = '#FFCE67'
 
